@@ -8,22 +8,23 @@ namespace Todo
     * Directive that executes an expression when the element it is applied to loses focus
     */
 
-   public class todoBlurDefinition : DirectiveDefinition
+   public class todoBlurDirective : IDirective
    {
-      public todoBlurDefinition()
+      public DefinitionObject GetDefinition()
       {
-         Name = "todoBlur";        
-         DirectiveController = typeof(todoBlurController);
+         var def = new DirectiveDefinitionHelper();  
+         def.Controller<todoBlurController>();    
+         return def.ToDefinitionObject();
       }
    }
 
-   public class todoBlurController : Scope
+   public class todoBlurController 
    {      
       public void Link(Scope _scope, Element elem, Attributes attrs)
       {         
          elem.bind("blur",()=>
          {
-            Apply<string>(attrs["todoBlur"]);
+            _scope.Apply<string>(attrs["todoBlur"]);
          });         
       }
    }

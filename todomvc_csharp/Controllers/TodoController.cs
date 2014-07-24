@@ -1,7 +1,6 @@
 ﻿using System;
-
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
-
 using AngularJS;
 
 namespace Todo
@@ -11,7 +10,7 @@ namespace Todo
     * - retrieves and persists the model via the todoStorage service
     * - exposes the model to the template and provides event handlers
     */
-   public class TodoCtrl : Scope
+   public class TodoCtrl 
    {
       public TodoItem[] todos;
       public string newTodo;
@@ -37,11 +36,11 @@ namespace Todo
 	      newTodo = "";
 	      editedTodo = null;
 
-         Watch<object>(()=>todos, update, true);
+         _scope.Watch<object>(()=>todos, update, true);
 
 	      if(location.Path == "") location.Path = "/";
 	      	      
-         Watch<string>(()=>location.Path, pathchanged);         
+         _scope.Watch<string>(()=>location.Path, pathchanged);         
       }            
 
       public void update()
@@ -53,7 +52,7 @@ namespace Todo
       }	
 
       public void pathchanged(string path, string oldpath)
-      {
+      {       
          statusFilter = (path == "/active")    ? new { completed=false } : 
                         (path == "/completed") ? new { completed=true  } : null;	
       }

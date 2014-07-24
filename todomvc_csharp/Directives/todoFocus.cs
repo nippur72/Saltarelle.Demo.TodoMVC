@@ -7,16 +7,18 @@ namespace Todo
    /**
     * Directive that places focus on the element it is applied to when the expression it binds to evaluates to true
     */
-   public class todoFocusDefinition : DirectiveDefinition
+       
+   public class todoFocusDirective : IDirective
    {
-      public todoFocusDefinition()
+      public DefinitionObject GetDefinition()
       {
-         Name = "todoFocus";
-         DirectiveController = typeof(todoFocusController);
-      }        
+         var def = new DirectiveDefinitionHelper();  
+         def.Controller<todoFocusController>();    
+         return def.ToDefinitionObject();
+      }           
    }
 
-   public class todoFocusController : Scope
+   public class todoFocusController 
    {
       public Timeout timeout;          
 
@@ -27,7 +29,7 @@ namespace Todo
 
       public void Link(Scope _scope, /*AngularJS.Element*/ dynamic elem, Attributes attrs)
       {                  
-         Watch<bool>(attrs["todoFocus"], (newValue, oldValue) =>
+         _scope.Watch<bool>(attrs["todoFocus"], (newValue, oldValue) =>
          {            
             if(newValue) 
             {
