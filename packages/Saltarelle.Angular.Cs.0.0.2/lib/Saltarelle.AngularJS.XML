@@ -232,12 +232,12 @@
             Sets or returns url
             </summary>
         </member>
-        <member name="M:AngularJS.Scope.Apply">
+        <member name="M:AngularJS.Scope.Apply``1(System.String)">
             <summary>
             Executes an expression in angular from outside of the angular framework
             </summary>      
         </member>
-        <member name="M:AngularJS.Scope.Apply``1(System.String)">
+        <member name="M:AngularJS.Scope.Apply(System.Action{AngularJS.Scope})">
             <summary>
             Executes an expression in angular from outside of the angular framework
             </summary>      
@@ -295,6 +295,11 @@
         <member name="M:AngularJS.Scope.On(System.String,System.Action{AngularJS.Event})">
             <summary>
             Listens on events of a given type.
+            </summary>      
+        </member>
+        <member name="M:AngularJS.Scope.ControllerAs``1(System.String)">
+            <summary>
+            Access the controller class added to the $scope with the "controller as" syntax
             </summary>      
         </member>
         <member name="P:AngularJS.Module.Name">
