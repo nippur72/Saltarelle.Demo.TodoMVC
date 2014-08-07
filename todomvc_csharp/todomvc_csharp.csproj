@@ -62,7 +62,7 @@
     </Reference>
     <Reference Include="Saltarelle.AngularJS, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Saltarelle.Angular.Cs.0.0.2\lib\Saltarelle.AngularJS.dll</HintPath>
+      <HintPath>..\packages\Saltarelle.Angular.Cs.0.0.5\lib\Saltarelle.AngularJS.dll</HintPath>
     </Reference>
     <Reference Include="Saltarelle.Web, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a4048e8fcc593f14, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

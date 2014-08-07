@@ -10,22 +10,19 @@ namespace Todo
 
    public class todoBlurDirective : IDirective
    {
-      public DefinitionObject GetDefinition()
-      {
-         var def = new DirectiveDefinitionHelper();  
-         def.Controller<todoBlurController>();    
-         return def.ToDefinitionObject();
-      }
-   }
-
-   public class todoBlurController 
-   {      
-      public void Link(Scope _scope, Element elem, Attributes attrs)
+      public void Link(Scope _scope, jElement elem, Attributes attrs)
       {         
-         elem.bind("blur",()=>
+         elem.bind("blur",(ev)=>
          {
             _scope.Apply<string>(attrs["todoBlur"]);
-         });         
+         });            
+      }
+
+      public DefinitionObject GetDefinition()
+      {
+         var def = new DirectiveDefinitionHelper();           
+         def.LinkFunction(this.Link);    
+         return def.ToDefinitionObject();
       }
    }
 }

@@ -18,20 +18,14 @@
 		// The main TodoMVC app module
 		var todoapp = angular.module('todomvc', []);
 		// directives
-		AngularJS.ModuleBuilder.Directive($Todo_todoBlurDirective).call(null, todoapp);
-		AngularJS.ModuleBuilder.Directive($Todo_todoFocusDirective).call(null, todoapp);
+		AngularJS.ModuleBuilder.Directive($Todo_todoBlurDirective).call(null, todoapp, []);
+		AngularJS.ModuleBuilder.Directive($Todo_todoFocusDirective).call(null, todoapp, []);
 		// services         
-		AngularJS.ModuleBuilder.Service($Todo_todoStorage).call(null, todoapp);
+		AngularJS.ModuleBuilder.Service($Todo_todoStorage).call(null, todoapp, []);
 		// controllers
-		AngularJS.ModuleBuilder.Controller($Todo_TodoCtrl).call(null, todoapp);
+		AngularJS.ModuleBuilder.Controller($Todo_TodoCtrl).call(null, todoapp, []);
 	};
 	global.Todo.TodoApp = $Todo_TodoApp;
-	////////////////////////////////////////////////////////////////////////////////
-	// Todo.todoBlurController
-	var $Todo_todoBlurController = function() {
-	};
-	$Todo_todoBlurController.__typeName = 'Todo.todoBlurController';
-	global.Todo.todoBlurController = $Todo_todoBlurController;
 	////////////////////////////////////////////////////////////////////////////////
 	// Todo.todoBlurDirective
 	var $Todo_todoBlurDirective = function() {
@@ -70,16 +64,10 @@
 	$Todo_TodoCtrl.__typeName = 'Todo.TodoCtrl';
 	global.Todo.TodoCtrl = $Todo_TodoCtrl;
 	////////////////////////////////////////////////////////////////////////////////
-	// Todo.todoFocusController
-	var $Todo_todoFocusController = function(_timeout) {
+	// Todo.todoFocusDirective
+	var $Todo_todoFocusDirective = function(_timeout) {
 		this.timeout = null;
 		this.timeout = _timeout;
-	};
-	$Todo_todoFocusController.__typeName = 'Todo.todoFocusController';
-	global.Todo.todoFocusController = $Todo_todoFocusController;
-	////////////////////////////////////////////////////////////////////////////////
-	// Todo.todoFocusDirective
-	var $Todo_todoFocusDirective = function() {
 	};
 	$Todo_todoFocusDirective.__typeName = 'Todo.todoFocusDirective';
 	global.Todo.todoFocusDirective = $Todo_todoFocusDirective;
@@ -99,17 +87,15 @@
 	global.Todo.todoStorage = $Todo_todoStorage;
 	ss.initClass($ArrayExtensions, $asm, {});
 	ss.initClass($Todo_TodoApp, $asm, {});
-	ss.initClass($Todo_todoBlurController, $asm, {
+	ss.initClass($Todo_todoBlurDirective, $asm, {
 		Link: function(_scope, elem, attrs) {
-			elem.bind('blur', function() {
+			elem.bind('blur', function(ev) {
 				_scope.$apply(attrs['todoBlur']);
 			});
-		}
-	});
-	ss.initClass($Todo_todoBlurDirective, $asm, {
+		},
 		GetDefinition: function() {
 			var def = new AngularJS.DirectiveDefinitionHelper();
-			def.Controller($Todo_todoBlurController).call(def);
+			def.$Link = ss.mkdel(this, this.Link);
 			return def.ToDefinitionObject();
 		}
 	}, null, [AngularJS.IDirective]);
@@ -160,7 +146,7 @@
 			}
 		}
 	});
-	ss.initClass($Todo_todoFocusController, $asm, {
+	ss.initClass($Todo_todoFocusDirective, $asm, {
 		Link: function(_scope, elem, attrs) {
 			_scope.$watch(attrs['todoFocus'], ss.mkdel(this, function(newValue, oldValue) {
 				if (newValue) {
@@ -169,12 +155,10 @@
 					}, 0, false);
 				}
 			}));
-		}
-	});
-	ss.initClass($Todo_todoFocusDirective, $asm, {
+		},
 		GetDefinition: function() {
 			var def = new AngularJS.DirectiveDefinitionHelper();
-			def.Controller($Todo_todoFocusController).call(def);
+			def.$Link = ss.mkdel(this, this.Link);
 			return def.ToDefinitionObject();
 		}
 	}, null, [AngularJS.IDirective]);

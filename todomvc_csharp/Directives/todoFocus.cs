@@ -10,34 +10,31 @@ namespace Todo
        
    public class todoFocusDirective : IDirective
    {
-      public DefinitionObject GetDefinition()
-      {
-         var def = new DirectiveDefinitionHelper();  
-         def.Controller<todoFocusController>();    
-         return def.ToDefinitionObject();
-      }           
-   }
-
-   public class todoFocusController 
-   {
       public Timeout timeout;          
 
-      public todoFocusController(Timeout _timeout)
+      public todoFocusDirective(Timeout _timeout)
       {
          timeout = _timeout;        
       }
 
-      public void Link(Scope _scope, /*AngularJS.Element*/ dynamic elem, Attributes attrs)
+      public void Link(Scope _scope, jElement elem, Attributes attrs)
       {                  
          _scope.Watch<bool>(attrs["todoFocus"], (newValue, oldValue) =>
          {            
             if(newValue) 
             {
-               timeout.Set( ()=>{elem[0].focus();} , 0, false);   
+               timeout.Set( ()=>{ elem[0].Focus(); }, 0, false);   
             }            
          });         
       }
-   }
+
+      public DefinitionObject GetDefinition()
+      {
+         var def = new DirectiveDefinitionHelper();  
+         def.LinkFunction(this.Link);
+         return def.ToDefinitionObject();
+      }           
+   }   
 }
 
 

@@ -2,6 +2,7 @@
 	'use strict';
 	var $asm = {};
 	global.AngularJS = global.AngularJS || {};
+	global.AngularJS.Animate = global.AngularJS.Animate || {};
 	global.AngularJS.UiRouter = global.AngularJS.UiRouter || {};
 	ss.initAssembly($asm, 'Saltarelle.AngularJS');
 	////////////////////////////////////////////////////////////////////////////////
@@ -37,8 +38,8 @@
 		this.$Require = [];
 		this.$ControllerType = null;
 		this.ControllerAs = null;
-		this.Compile = null;
-		this.Link = null;
+		this.$Compile = null;
+		this.$Link = null;
 	};
 	$AngularJS_DirectiveDefinitionHelper.__typeName = 'AngularJS.DirectiveDefinitionHelper';
 	global.AngularJS.DirectiveDefinitionHelper = $AngularJS_DirectiveDefinitionHelper;
@@ -60,6 +61,14 @@
 	};
 	$AngularJS_IDirective.__typeName = 'AngularJS.IDirective';
 	global.AngularJS.IDirective = $AngularJS_IDirective;
+	////////////////////////////////////////////////////////////////////////////////
+	// AngularJS.InjectAttribute
+	var $AngularJS_InjectAttribute = function(annotations) {
+		this.Injectables = null;
+		this.Injectables = annotations;
+	};
+	$AngularJS_InjectAttribute.__typeName = 'AngularJS.InjectAttribute';
+	global.AngularJS.InjectAttribute = $AngularJS_InjectAttribute;
 	////////////////////////////////////////////////////////////////////////////////
 	// AngularJS.IResourceObject
 	var $AngularJS_IResourceObject = function() {
@@ -96,34 +105,49 @@
 		}
 		return result;
 	};
-	$AngularJS_ModuleBuilder.FixAnnotation = function(type) {
+	$AngularJS_ModuleBuilder.FixAnnotation = function(type, annotations) {
 		var constructor = $AngularJS_TypeExtensionMethods.GetConstructorFunction(type);
-		// gets and annotate constructor parameter; annotations are stored in type.$inject                                             
-		var parameters = $AngularJS_ModuleBuilder.PatchDollarName$1(angular.injector().annotate(constructor));
-		// fix "$" in parameter names
+		var parameters = null;
+		if (ss.isValue(annotations) && annotations.length > 0) {
+			// annotations are specified as argument 
+			parameters = annotations;
+		}
+		else {
+			var attrs = ss.getAttributes(type, $AngularJS_InjectAttribute, true);
+			if (attrs.length !== 0) {
+				// annotations are specified with the [Inject] decorator 
+				parameters = ss.safeCast(attrs[0], $AngularJS_InjectAttribute).Injectables;
+			}
+			else {
+				// annotations are read from constructor parameter names
+				// fix "$" in parameter names
+				parameters = $AngularJS_ModuleBuilder.PatchDollarName$1(angular.injector().annotate(constructor));
+			}
+		}
+		// annotations are stored in type.$inject
 		constructor.$inject = parameters;
 		return parameters;
 	};
 	$AngularJS_ModuleBuilder.Controller = function(T) {
-		return function(module) {
+		return function(module, annotations) {
 			var type = T;
-			$AngularJS_ModuleBuilder.FixAnnotation(type);
+			$AngularJS_ModuleBuilder.FixAnnotation(type, annotations);
 			module.controller(ss.getTypeName(type), type);
 		};
 	};
 	$AngularJS_ModuleBuilder.Service = function(T) {
-		return function(module) {
+		return function(module, annotations) {
 			var type = T;
-			$AngularJS_ModuleBuilder.FixAnnotation(type);
+			$AngularJS_ModuleBuilder.FixAnnotation(type, annotations);
 			// patch service name for names starting with "$"                
 			var servicename = $AngularJS_ModuleBuilder.PatchDollarName(ss.getTypeName(T));
 			module.service(servicename, type);
 		};
 	};
 	$AngularJS_ModuleBuilder.Config = function(T) {
-		return function(module) {
+		return function(module, annotations) {
 			var type = T;
-			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type);
+			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type, annotations);
 			var plist = $AngularJS_ModuleBuilder.CommaSeparatedList(parameters);
 			// "run" function are called without a "this" reference, so we need to instantiate the class with "new"
 			var body = '{ new ' + ss.getTypeFullName(type) + '(' + plist + '); }';
@@ -133,9 +157,9 @@
 		};
 	};
 	$AngularJS_ModuleBuilder.Run = function(T) {
-		return function(module) {
+		return function(module, annotations) {
 			var type = T;
-			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type);
+			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type, annotations);
 			var plist = $AngularJS_ModuleBuilder.CommaSeparatedList(parameters);
 			// "run" function are called without a "this" reference, so we need to instantiate the class with "new"
 			var body = '{ new ' + ss.getTypeFullName(type) + '(' + plist + '); }';
@@ -145,9 +169,9 @@
 		};
 	};
 	$AngularJS_ModuleBuilder.Factory = function(T) {
-		return function(module) {
+		return function(module, annotations) {
 			var type = T;
-			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type);
+			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type, annotations);
 			var plist = $AngularJS_ModuleBuilder.CommaSeparatedList(parameters);
 			// register all public instance methods as factory                      
 			var $t1 = $AngularJS_TypeExtensionMethods.GetInstanceMethodNames(type);
@@ -160,9 +184,9 @@
 		};
 	};
 	$AngularJS_ModuleBuilder.Filter = function(T) {
-		return function(module) {
+		return function(module, annotations) {
 			var type = T;
-			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type);
+			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type, annotations);
 			var plist = $AngularJS_ModuleBuilder.CommaSeparatedList(parameters);
 			// register all public instance methods as filters                      
 			var $t1 = $AngularJS_TypeExtensionMethods.GetInstanceMethodNames(type);
@@ -176,9 +200,9 @@
 		};
 	};
 	$AngularJS_ModuleBuilder.Directive = function(T) {
-		return function(module) {
+		return function(module, annotations) {
 			var type = T;
-			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type);
+			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type, annotations);
 			var plist = $AngularJS_ModuleBuilder.CommaSeparatedList(parameters);
 			// a directive is a (injectable) function returning a definition object
 			var body = '{ var $ob = new ' + ss.getTypeFullName(type) + '(' + plist + '); return $ob.GetDefinition(); }';
@@ -193,75 +217,16 @@
 		};
 	};
 	$AngularJS_ModuleBuilder.Animation = function(T) {
-		return function(module, name) {
-			//
-			//         Type type = typeof(T);
-			//
-			//         
-			//
-			//         // TODO when there will be IsSubClassOf
-			//
-			//         //if(!type.IsSubclassOf(DirectiveDefinition)) throw new Exception(String.Format("{0} is not sub class of {1}",type.Name,typeof(DirectiveDefinition).Name);
-			//
-			//         
-			//
-			//         Function fun = CreateAnimationFunction(type);
-			//
-			//         var parameters = Angular.Injector().Annotate(fun);
-			//
-			//         var fcall = fun.CreateFunctionCall(parameters);
-			//
-			//         Animation(module, name==null ? type.Name : name, fcall);
+		return function(module, name, annotations) {
+			var type = T;
+			var parameters = $AngularJS_ModuleBuilder.FixAnnotation(type, annotations);
+			var plist = $AngularJS_ModuleBuilder.CommaSeparatedList(parameters);
+			// an animation is a (injectable) function returning a definition object
+			var body = '{ var $ob = new ' + ss.getTypeFullName(type) + '(' + plist + '); return $ob.GetDefinition(); }';
+			var F = new Function(parameters, body);
+			// extract directive name from the class name         
+			module.animation(name, F);
 		};
-	};
-	$AngularJS_ModuleBuilder.$CreateAnimationFunction = function(type) {
-		return null;
-		//
-		//         string body = "";
-		//
-		//         string thisref = "this";
-		//
-		//         
-		//
-		//         body+="var $animob = {};\r\n";
-		//
-		//         
-		//
-		//         // gets and annotate constructor parameter; annotations are stored in type.$inject
-		//
-		//         var parameters = Angular.Injector().Annotate(type.GetConstructorFunction());
-		//
-		//         
-		//
-		//         // takes method into $scope, binding "$scope" to "this"
-		//
-		//         foreach(string funcname in type.GetInstanceMethodNames())
-		//
-		//         {
-		//
-		//         body += String.Format("{2}.{1} = {0}.prototype.{1}.bind({2});\r\n",type.FullName,funcname,thisref);
-		//
-		//         
-		//
-		//         if(funcname=="Start" || funcname=="Setup" || funcname=="Cancel" )
-		//
-		//         {
-		//
-		//         body += String.Format("$animob.{0} = {2}.{1};\r\n",funcname.ToLower(),funcname,thisref);
-		//
-		//         }
-		//
-		//         }
-		//
-		//         
-		//
-		//         // put call at the end so that methods are defined first
-		//
-		//         body+=String.Format("{0}.apply({1},arguments);\r\n",type.FullName,thisref);
-		//
-		//         body+=String.Format("return $animob;\r\n");
-		//
-		//         return TypeExtensionMethods.CreateNewFunction(parameters,body);
 	};
 	global.AngularJS.ModuleBuilder = $AngularJS_ModuleBuilder;
 	////////////////////////////////////////////////////////////////////////////////
@@ -383,6 +348,12 @@
 	};
 	global.AngularJS.TypeExtensionMethods = $AngularJS_TypeExtensionMethods;
 	////////////////////////////////////////////////////////////////////////////////
+	// AngularJS.Animate.IAnimation
+	var $AngularJS_Animate_IAnimation = function() {
+	};
+	$AngularJS_Animate_IAnimation.__typeName = 'AngularJS.Animate.IAnimation';
+	global.AngularJS.Animate.IAnimation = $AngularJS_Animate_IAnimation;
+	////////////////////////////////////////////////////////////////////////////////
 	// AngularJS.UiRouter.StateEventsExtensions
 	var $AngularJS_UiRouter_StateEventsExtensions = function() {
 	};
@@ -487,16 +458,16 @@
 				}
 				result['scope'] = scope;
 			}
-			// maps compile and link function
-			if (!ss.staticEquals(this.Compile, null)) {
-				result['compile'] = this.Compile;
+			// maps compile and link function         
+			if (!ss.staticEquals(this.$Compile, null)) {
+				result['compile'] = this.$Compile;
 			}
-			if (!ss.staticEquals(this.Link, null)) {
-				result['link'] = this.Link;
+			if (!ss.staticEquals(this.$Link, null)) {
+				result['link'] = this.$Link;
 			}
 			// maps (shared) controller         
 			if (ss.isValue(this.$ControllerType)) {
-				$AngularJS_ModuleBuilder.FixAnnotation(this.$ControllerType);
+				$AngularJS_ModuleBuilder.FixAnnotation(this.$ControllerType, []);
 				result['controller'] = this.$ControllerType;
 			}
 			// maps controllerAs 
@@ -518,6 +489,7 @@
 	});
 	ss.initClass($AngularJS_Event, $asm, {});
 	ss.initInterface($AngularJS_IDirective, $asm, { GetDefinition: null });
+	ss.initClass($AngularJS_InjectAttribute, $asm, {});
 	ss.initInterface($AngularJS_IResourceObject, $asm, {});
 	ss.initClass($AngularJS_ModuleBuilder, $asm, {});
 	ss.initClass($AngularJS_ResourceObjectExtensions, $asm, {});
@@ -545,6 +517,7 @@
 	$AngularJS_ScopeBindings.$ctor2.prototype = $AngularJS_ScopeBindings.$ctor1.prototype = $AngularJS_ScopeBindings.$ctor3.prototype = $AngularJS_ScopeBindings.prototype;
 	ss.initEnum($AngularJS_ScopeModes, $asm, { Existing: 0, New: 1, Isolate: 2 });
 	ss.initClass($AngularJS_TypeExtensionMethods, $asm, {});
+	ss.initInterface($AngularJS_Animate_IAnimation, $asm, { GetDefinition: null });
 	ss.initClass($AngularJS_UiRouter_StateEventsExtensions, $asm, {});
 	ss.setMetadata($AngularJS_RestrictFlags, { enumFlags: true });
 })();
